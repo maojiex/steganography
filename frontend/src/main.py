@@ -1,12 +1,9 @@
 from tkinter import *
 import eel
-<<<<<<< HEAD:main.py
 import io
 import os
 import PySimpleGUI as sg
 from PIL import Image
-=======
->>>>>>> main:frontend/src/main.py
 
 # Python program implementing Image Steganography
 
@@ -100,20 +97,11 @@ def encode_enc(new_img, data):
 
 # Encode data into image
 @eel.expose
-<<<<<<< HEAD:main.py
 def encode(image, data):
     # img = input("Enter image name(with extension) : ")
     # image = Image.open("./input_img/" + img, 'r')
 
     # data = input("Enter data to be encoded : ")
-=======
-def encode():
-    img = input("Enter image name(with extension) : ")
-    image = Image.open("./input_img/" + img, 'r')
-
-    # data = input("Enter data to be encoded : ")
-    data = "asdfgh"
->>>>>>> main:frontend/src/main.py
     if len(data) == 0:
         raise ValueError('Data is empty')
 
@@ -121,7 +109,6 @@ def encode():
     encode_enc(new_img, data)
 
     # new_img_name = input("Enter the name of new image(with extension) : ")
-<<<<<<< HEAD:main.py
     # new_img.save("./output_img/" + new_img_name, str(new_img_name.split(".")[1].upper()))
     # GUI_encode(new_img)
     return new_img
@@ -130,18 +117,6 @@ def encode():
 def decode(image):
     # img = input("Enter image name(with extension) : ")
     # image = Image.open("./output_img/" + img, 'r')
-=======
-    new_img_name = "new"
-    new_img.save("./output_img/" + new_img_name, str(new_img_name.split(".")[1].upper()))
-    GUI_encode(new_img)
-
-
-# Decode the data in the image
-@eel.expose
-def decode():
-    img = input("Enter image name(with extension) : ")
-    image = Image.open("./output_img/" + img, 'r')
->>>>>>> main:frontend/src/main.py
 
     data = ''
     imgdata = iter(image.getdata())
@@ -182,15 +157,7 @@ def GUI_encode(img):
 
 # Main Function
 @eel.expose
-<<<<<<< HEAD:main.py
 def main():
-=======
-def app():
-    user_input = int(input(":: Welcome to Steganography ::\n"
-                  "1. Encode\n2. Decode\n"))
-    if user_input == 1:
-        encode()
->>>>>>> main:frontend/src/main.py
 
     layout = [
         [sg.Image(key="-IMAGE-"), sg.Image(key="-IMAGEAFTER-")],
