@@ -1,10 +1,19 @@
 from tkinter import *
+import eel
+import io
+import os
+import PySimpleGUI as sg
+from PIL import Image
 
 # Python program implementing Image Steganography
 
 # PIL module is used to extract
 # pixels of image and modify it
 from PIL import Image, ImageTk
+
+file_types = [("JPEG (*.jpg)", "*.jpg"),
+              ("All files (*.*)", "*.*")]
+
 
 
 # Convert encoding data into 8-bit binary
@@ -83,26 +92,27 @@ def encode_enc(new_img, data):
 
 
 # Encode data into image
-def encode():
-    img = input("Enter image name(with extension) : ")
-    image = Image.open("./input_img/" + img, 'r')
+@eel.expose
+def encode(image, data):
+    # img = input("Enter image name(with extension) : ")
+    # image = Image.open("./input_img/" + img, 'r')
 
-    data = input("Enter data to be encoded : ")
+    # data = input("Enter data to be encoded : ")
     if len(data) == 0:
         raise ValueError('Data is empty')
 
     new_img = image.copy()
     encode_enc(new_img, data)
 
-    new_img_name = input("Enter the name of new image(with extension) : ")
-    new_img.save("./output_img/" + new_img_name, str(new_img_name.split(".")[1].upper()))
-    GUI_encode(new_img)
-
+    # new_img_name = input("Enter the name of new image(with extension) : ")
+    # new_img.save("./output_img/" + new_img_name, str(new_img_name.split(".")[1].upper()))
+    # GUI_encode(new_img)
+    return new_img
 
 # Decode the data in the image
-def decode():
-    img = input("Enter image name(with extension) : ")
-    image = Image.open("./output_img/" + img, 'r')
+def decode(image):
+    # img = input("Enter image name(with extension) : ")
+    # image = Image.open("./output_img/" + img, 'r')
 
     data = ''
     imgdata = iter(image.getdata())
@@ -125,7 +135,7 @@ def decode():
         if pixels[-1] % 2 != 0:
             return data
 
-
+@eel.expose
 def GUI_decode(input_str):
     root = Tk()
     Label(root, text=input_str).pack()
@@ -142,17 +152,71 @@ def GUI_encode(img):
 
 
 # Main Function
+@eel.expose
 def main():
-    user_input = int(input(":: Welcome to Steganography ::\n"
-                  "1. Encode\n2. Decode\n"))
-    if user_input == 1:
-        encode()
 
-    elif user_input == 2:
-        GUI_decode(decode())
+    layout = [
+        [sg.Image(key="-IMAGE-"), sg.Image(key="-IMAGEAFTER-")],
+        [sg.Text(key="imagetag",size = (50,1)), sg.Text(key="imagetag_after", size = (50,1))],
+        [
+            sg.Text("Image File"),
+            sg.Input(size=(25, 1), key="-FILE-"),
+            sg.FileBrowse(file_types=file_types),
+            sg.Button("Load Image"),
+        ],
+        [
+            sg.Text("Encode Message"),
+            sg.Multiline(size=(15, 2), key="-Encode Message-"),
+            sg.Button("Encode"),
+        ],
+        [
+            sg.Button("Decode"),
+            sg.Text("Decoded Message"),
+            sg.Multiline(size=(15, 2), key="-Decoded Message-"),
+        ]
+    ]
 
-    else:
-        raise Exception("Enter correct input")
+    window = sg.Window("Image Viewer", layout)
+
+    image_upload_flag = False
+    image_decoded = False
+    while True:
+        event, values = window.read()
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+        if event == "Load Image":
+            filename = values["-FILE-"]
+            if os.path.exists(filename):
+                image = Image.open(values["-FILE-"])
+                image_upload_flag = True
+                image.thumbnail((400, 400))
+                bio = io.BytesIO()
+                image.save(bio, format="PNG")
+                window["-IMAGE-"].update(data=bio.getvalue())
+        if event == "Encode":
+            if image_upload_flag == False:
+                sg.popup('No image uploaded, please upload an image at first')
+                continue
+            encode_message = values["-Encode Message-"]
+            if len(encode_message) == 0:
+                sg.popup('No encode message are provided')
+                continue
+            new_image = encode(image,encode_message)
+            image_decoded = True
+            new_bio = io.BytesIO()
+            new_image.save(new_bio, format="PNG")
+            window['-IMAGEAFTER-'].update(data = new_bio.getvalue())
+            window["imagetag"].update("Original Image")
+            window["imagetag_after"].update("Image Encoded")
+        if event == "Decode":
+            if image_decoded == False:
+                sg.popup('Image are not encoded, please encode first')
+                continue
+            decode_result = decode(new_image)
+            window["-Decoded Message-"].update(decode_result)
+
+    window.close()
+
 
 
 # Driver Code
