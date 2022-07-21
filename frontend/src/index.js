@@ -9,6 +9,9 @@ form.addEventListener("click", () => {
     imgInput.click();
 });
 
+
+
+
 imgInput.onchange = ({target}) => {
     img = target.files[0];
     if (img) {
@@ -19,15 +22,15 @@ imgInput.onchange = ({target}) => {
     }
 }
 
-function uploadFile(name){
-    let xhr = new XMLHttpRequest();
-    xhr.open("POST", "php/upload.php");
-    xhr.upload.addEventListener('progress', e => {
-        console.log(e);
-    })
-    let formData = new FormData(form)
-    xhr.send(formData);
-}
+// function uploadFile(name){
+//     let xhr = new XMLHttpRequest();
+//     xhr.open("POST", "php/upload.php");
+//     xhr.upload.addEventListener('progress', e => {
+//         console.log(e);
+//     })
+//     let formData = new FormData(form)
+//     xhr.send(formData);
+// }
 
 
 // function readImage(file) {
@@ -44,9 +47,20 @@ function uploadFile(name){
 //     reader.readAsDataURL(file);
 //   }
 
-encode_btn.onclick = function encode(){
+
+encode_btn.onclick = async function user(){
     // python -> javascript
     // 1. encode
     console.log(img)
     // 2. download
+  
+    const res = await eel.app()();
+ 
+
+    
 }
+
+// TODO
+// Login/Logout by Google Authentic, No database needed
+// secret key
+// database??
