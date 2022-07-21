@@ -227,10 +227,10 @@ def main():
 
 
 
-# if __name__ == '__main__':
-#     # Calling main function
-#     main()
+if __name__ == '__main__':
+    # Calling main function
+    main()
 
 
-eel.init('../src')
-eel.start('index.html')
+# eel.init('../src')
+# eel.start('index.html')
