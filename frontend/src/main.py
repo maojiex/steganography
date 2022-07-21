@@ -11,7 +11,8 @@ from PIL import Image
 # pixels of image and modify it
 from PIL import Image, ImageTk
 
-file_types = [("JPEG (*.jpg)", "*.jpg"),
+file_types = [("PNG (*.png)", "*.png"),
+              ("JPEG (*.jpg)", "*.jpg"),
               ("All files (*.*)", "*.*")]
 
 
@@ -199,11 +200,11 @@ def main():
                 window["-IMAGE-"].update(data=bio.getvalue())
         if event == "Encode":
             if image_upload_flag == False:
-                sg.popup('No image uploaded, please upload an image at first')
+                sg.popup('No image uploaded, please upload an image first')
                 continue
             encode_message = values["-Encode Message-"]
             if len(encode_message) == 0:
-                sg.popup('No encode message are provided')
+                sg.popup('No encode message provided')
                 continue
             new_image = encode(image,encode_message)
             image_decoded = True
@@ -214,7 +215,7 @@ def main():
             window["imagetag_after"].update("Image Encoded")
         if event == "Decode":
             if image_decoded == False:
-                sg.popup('Image are not encoded, please encode first')
+                sg.popup('Image is not encoded, please encode first')
                 continue
             decode_result = decode(new_image)
             window["-Decoded Message-"].update(decode_result)
