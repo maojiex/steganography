@@ -3,6 +3,7 @@ import eel
 import io
 import os
 import PySimpleGUI as sg
+import hashlib
 from PIL import Image
 
 # Python program implementing Image Steganography
@@ -11,7 +12,8 @@ from PIL import Image
 # pixels of image and modify it
 from PIL import Image, ImageTk
 
-file_types = [("JPEG (*.jpg)", "*.jpg"),
+file_types = [("PNG (*.png)", "*.png"),
+              ("JPEG (*.jpg)", "*.jpg"),
               ("All files (*.*)", "*.*")]
 
 
@@ -105,6 +107,11 @@ def encode(image, data):
     if len(data) == 0:
         raise ValueError('Data is empty')
 
+    # data = hashlib.sha256(data.encode()).hexdigest()
+    # print(len(data))
+    # print(type(data.hexdigest()))
+    # print(data)
+    # print(type(data))
     new_img = image.copy()
     encode_enc(new_img, data)
 
@@ -171,6 +178,11 @@ def main():
         [
             sg.Text("Encode Message"),
             sg.Multiline(size=(15, 2), key="-Encode Message-"),
+            # sg.Button("Encode"),
+        ],
+        [
+            sg.Text("Password"),
+            sg.InputText(size=(15, 2), password_char='*', key="-Password-"),
             sg.Button("Encode"),
         ],
         [
@@ -199,11 +211,15 @@ def main():
                 window["-IMAGE-"].update(data=bio.getvalue())
         if event == "Encode":
             if image_upload_flag == False:
-                sg.popup('No image uploaded, please upload an image at first')
+                sg.popup('No image uploaded, please upload an image first')
                 continue
             encode_message = values["-Encode Message-"]
             if len(encode_message) == 0:
-                sg.popup('No encode message are provided')
+                sg.popup('No encode message provided')
+                continue
+            password = values['-Password-']
+            if len(password) == 0:
+                sg.popup('No password provided')
                 continue
             new_image = encode(image,encode_message)
             image_decoded = True
@@ -214,7 +230,7 @@ def main():
             window["imagetag_after"].update("Image Encoded")
         if event == "Decode":
             if image_decoded == False:
-                sg.popup('Image are not encoded, please encode first')
+                sg.popup('Image is not encoded, please encode first')
                 continue
             decode_result = decode(new_image)
             window["-Decoded Message-"].update(decode_result)
