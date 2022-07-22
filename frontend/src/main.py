@@ -107,11 +107,6 @@ def encode(image, data, password):
     if len(data) == 0:
         raise ValueError('Data is empty')
 
-    # data = hashlib.sha256(data.encode()).hexdigest()
-    # print(len(data))
-    # print(type(data.hexdigest()))
-    # print(data)
-    # print(type(data))
     data = password + data
     new_img = image.copy()
     encode_enc(new_img, data)
@@ -183,7 +178,6 @@ def main():
         [
             sg.Text("Encode Message"),
             sg.Multiline(size=(15, 2), key="-Encode Message-"),
-            # sg.Button("Encode"),
         ],
         [
             sg.Text("Password"),
@@ -196,7 +190,6 @@ def main():
             sg.Button("Decode"),
         ],
         [
-            # sg.Button("Decode"),
             sg.Text("Decoded Message"),
             sg.Multiline(size=(15, 2), key="-Decoded Message-"),
         ]
