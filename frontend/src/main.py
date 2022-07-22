@@ -3,6 +3,7 @@ import eel
 import io
 import os
 import PySimpleGUI as sg
+import hashlib
 from PIL import Image
 
 # Python program implementing Image Steganography
@@ -98,7 +99,7 @@ def encode_enc(new_img, data):
 
 # Encode data into image
 @eel.expose
-def encode(image, data):
+def encode(image, data, password):
     # img = input("Enter image name(with extension) : ")
     # image = Image.open("./input_img/" + img, 'r')
 
@@ -106,6 +107,7 @@ def encode(image, data):
     if len(data) == 0:
         raise ValueError('Data is empty')
 
+    data = password + data
     new_img = image.copy()
     encode_enc(new_img, data)
 
@@ -115,7 +117,7 @@ def encode(image, data):
     return new_img
 
 # Decode the data in the image
-def decode(image):
+def decode(image, password):
     # img = input("Enter image name(with extension) : ")
     # image = Image.open("./output_img/" + img, 'r')
 
@@ -138,7 +140,11 @@ def decode(image):
 
         data += chr(int(binstr, 2))
         if pixels[-1] % 2 != 0:
-            return data
+            existing_password = data[:64]
+            if password == existing_password:
+                return data[64:]
+            else:
+                return False
 
 @eel.expose
 def GUI_decode(input_str):
@@ -172,10 +178,18 @@ def main():
         [
             sg.Text("Encode Message"),
             sg.Multiline(size=(15, 2), key="-Encode Message-"),
+        ],
+        [
+            sg.Text("Password"),
+            sg.InputText(size=(15, 2), password_char='*', key="-Encode Password-"),
             sg.Button("Encode"),
         ],
         [
+            sg.Text("Enter Password to Decode"),
+            sg.InputText(size=(15, 2), password_char='*', key="-Decode Password-"),
             sg.Button("Decode"),
+        ],
+        [
             sg.Text("Decoded Message"),
             sg.Multiline(size=(15, 2), key="-Decoded Message-"),
         ]
@@ -206,7 +220,12 @@ def main():
             if len(encode_message) == 0:
                 sg.popup('No encode message provided')
                 continue
-            new_image = encode(image,encode_message)
+            password = values['-Encode Password-']
+            if len(password) == 0:
+                sg.popup('No password provided')
+                continue
+            password = hashlib.sha256(password.encode()).hexdigest()
+            new_image = encode(image, encode_message, password)
             image_decoded = True
             new_bio = io.BytesIO()
             new_image.save(new_bio, format="PNG")
@@ -217,7 +236,15 @@ def main():
             if image_decoded == False:
                 sg.popup('Image is not encoded, please encode first')
                 continue
-            decode_result = decode(new_image)
+            password = values['-Decode Password-']
+            if len(password) == 0:
+                sg.popup('No password entered')
+                continue
+            password = hashlib.sha256(password.encode()).hexdigest()
+            decode_result = decode(new_image, password)
+            if decode_result == False:
+                sg.popup('Incorrect password')
+                continue
             window["-Decoded Message-"].update(decode_result)
 
     window.close()
