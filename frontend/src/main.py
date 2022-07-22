@@ -122,7 +122,7 @@ def encode(image, data, password):
     return new_img
 
 # Decode the data in the image
-def decode(image):
+def decode(image, password):
     # img = input("Enter image name(with extension) : ")
     # image = Image.open("./output_img/" + img, 'r')
 
@@ -145,7 +145,11 @@ def decode(image):
 
         data += chr(int(binstr, 2))
         if pixels[-1] % 2 != 0:
-            return data[64:]
+            existing_password = data[:64]
+            if password == existing_password:
+                return data[64:]
+            else:
+                return False
 
 @eel.expose
 def GUI_decode(input_str):
@@ -244,7 +248,10 @@ def main():
                 sg.popup('No password entered')
                 continue
             password = hashlib.sha256(password.encode()).hexdigest()
-            decode_result = decode(new_image)
+            decode_result = decode(new_image, password)
+            if decode_result == False:
+                sg.popup('Incorrect password')
+                continue
             window["-Decoded Message-"].update(decode_result)
 
     window.close()
