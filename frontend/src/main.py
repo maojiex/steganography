@@ -99,7 +99,7 @@ def encode_enc(new_img, data):
 
 # Encode data into image
 @eel.expose
-def encode(image, data):
+def encode(image, data, password):
     # img = input("Enter image name(with extension) : ")
     # image = Image.open("./input_img/" + img, 'r')
 
@@ -112,6 +112,7 @@ def encode(image, data):
     # print(type(data.hexdigest()))
     # print(data)
     # print(type(data))
+    data = password + data
     new_img = image.copy()
     encode_enc(new_img, data)
 
@@ -221,7 +222,8 @@ def main():
             if len(password) == 0:
                 sg.popup('No password provided')
                 continue
-            new_image = encode(image,encode_message)
+            password = hashlib.sha256(password.encode()).hexdigest()
+            new_image = encode(image, encode_message, password)
             image_decoded = True
             new_bio = io.BytesIO()
             new_image.save(new_bio, format="PNG")
