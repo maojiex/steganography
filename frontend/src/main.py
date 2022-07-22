@@ -145,7 +145,7 @@ def decode(image):
 
         data += chr(int(binstr, 2))
         if pixels[-1] % 2 != 0:
-            return data
+            return data[64:]
 
 @eel.expose
 def GUI_decode(input_str):
@@ -183,11 +183,16 @@ def main():
         ],
         [
             sg.Text("Password"),
-            sg.InputText(size=(15, 2), password_char='*', key="-Password-"),
+            sg.InputText(size=(15, 2), password_char='*', key="-Encode Password-"),
             sg.Button("Encode"),
         ],
         [
+            sg.Text("Enter Password to Decode"),
+            sg.InputText(size=(15, 2), password_char='*', key="-Decode Password-"),
             sg.Button("Decode"),
+        ],
+        [
+            # sg.Button("Decode"),
             sg.Text("Decoded Message"),
             sg.Multiline(size=(15, 2), key="-Decoded Message-"),
         ]
@@ -218,7 +223,7 @@ def main():
             if len(encode_message) == 0:
                 sg.popup('No encode message provided')
                 continue
-            password = values['-Password-']
+            password = values['-Encode Password-']
             if len(password) == 0:
                 sg.popup('No password provided')
                 continue
@@ -234,6 +239,11 @@ def main():
             if image_decoded == False:
                 sg.popup('Image is not encoded, please encode first')
                 continue
+            password = values['-Decode Password-']
+            if len(password) == 0:
+                sg.popup('No password entered')
+                continue
+            password = hashlib.sha256(password.encode()).hexdigest()
             decode_result = decode(new_image)
             window["-Decoded Message-"].update(decode_result)
 
