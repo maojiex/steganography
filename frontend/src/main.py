@@ -1,4 +1,7 @@
 from tkinter import *
+from tkinter import filedialog
+from tkinter.filedialog import SaveFileDialog
+from click import command
 import eel
 import io
 import os
@@ -9,11 +12,10 @@ import bson
 import pymongo
 import requests
 import urllib
+import certifi
 
-# Python program implementing Image Steganography
 
-# PIL module is used to extract
-# pixels of image and modify it
+# PIL module is used to extract pixels of image and modify it
 from PIL import Image, ImageTk
 
 file_types = [("PNG (*.png)", "*.png"),
@@ -21,12 +23,9 @@ file_types = [("PNG (*.png)", "*.png"),
 			  ("All files (*.*)", "*.*")]
 
 
-# Convert encoding data into 8-bit binary
-# form using ASCII value of characters
-@eel.expose
+# Convert encoding data into 8-bit binary form using ASCII value of characters
 def genData(data):
-	# list of binary codes
-	# of given data
+	# list of binary codes of given data
 	newd = []
 
 	for i in data:
@@ -36,7 +35,6 @@ def genData(data):
 
 # Pixels are modified according to the
 # 8-bit binary data and finally returned
-@eel.expose
 def modPix(pix, data):
 	datalist = genData(data)
 	lendata = len(datalist)
@@ -62,10 +60,8 @@ def modPix(pix, data):
 					pix[j] += 1
 			# pix[j] -= 1
 
-		# Eighth pixel of every set tells
-		# whether to stop ot read further.
-		# 0 means keep reading; 1 means the
-		# message is over.
+		# Eighth pixel of every set tells whether to stop ot read further.
+		# 0 means keep reading; 1 means the message is over.
 		if i == lendata - 1:
 			if pix[-1] % 2 == 0:
 				if pix[-1] != 0:
@@ -83,7 +79,6 @@ def modPix(pix, data):
 		yield pix[6:9]
 
 
-@eel.expose
 def encode_enc(new_img, data):
 	w = new_img.size[0]
 	(x, y) = (0, 0)
@@ -100,12 +95,7 @@ def encode_enc(new_img, data):
 
 
 # Encode data into image
-@eel.expose
 def encode(image, data, password):
-	# img = input("Enter image name(with extension) : ")
-	# image = Image.open("./input_img/" + img, 'r')
-
-	# data = input("Enter data to be encoded : ")
 	if len(data) == 0:
 		raise ValueError('Data is empty')
 
@@ -121,8 +111,6 @@ def encode(image, data, password):
 
 # Decode the data in the image
 def decode(image, password):
-	# img = input("Enter image name(with extension) : ")
-	# image = Image.open("./output_img/" + img, 'r')
 
 	data = ''
 	imgdata = iter(image.getdata())
@@ -149,33 +137,28 @@ def decode(image, password):
 			else:
 				return False
 
-
-# @eel.expose
-# def GUI_decode(input_str):
-# 	root = Tk()
-# 	Label(root, text=input_str).pack()
-# 	root.title("the secret message")
-# 	root.mainloop()
-#
-#
-# @eel.expose
-# def GUI_encode(img):
-# 	root = Tk()
-# 	root.title("encoded image")
-# 	GUI_img = ImageTk.PhotoImage(img)
-# 	Label(image=GUI_img).pack()
-# 	root.mainloop()
-
 def db_operations(image, encode_message, password):
     conn = pymongo.MongoClient(
         "mongodb+srv://LijuanZhuge:" + urllib.parse.quote(
-            "I=myself100%") + "@cluster0.botulzy.mongodb.net/?retryWrites=true&w=majority")
+            "I=myself100%") + "@cluster0.botulzy.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())
     db = conn.finalproject
     inserted_id = db.encoderecords.insert_one({"file": [{"encoded_img": bson.binary.Binary(image.getvalue())},{'encode_message':encode_message},{"password":password}]}).inserted_id
     return inserted_id
 
+def db_searching(id):
+	conn = pymongo.MongoClient(
+		"mongodb+srv://LijuanZhuge:" + urllib.parse.quote(
+			"I=myself100%") + "@cluster0.botulzy.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())
+	db = conn.finalproject
+	if db.encoderecords.count_documents({"_id":bson.ObjectId(id)}) > 0:
+		return True
+	return False
+
+
+	
+	
+
 # Main Function
-@eel.expose
 def main():
 	layout = [
 		[sg.Image(key="-IMAGE-"), sg.Image(key="-IMAGEAFTER-")],
@@ -193,8 +176,19 @@ def main():
 		[
 			sg.Text("Password"),
 			sg.InputText(size=(15, 2), password_char='*', key="-Encode Password-"),
-			sg.Button("Encode"),
 		],
+		[
+			sg.Text("Type Decoded Image Name"),
+		 	sg.InputText(size=(15, 2), key="-New Name-"), 
+		 	sg.Button("Encode and Download"),
+		],
+		[
+			sg.Text("Image to Decode"),
+			sg.Input(size=(25, 1), key="-Encoded FILE-"),
+			sg.FileBrowse(file_types=file_types),
+			sg.Button("Input Image"),
+		],		
+		[sg.Text("Enter the Key"), sg.Input(size=(30,2), key="-Key-")],
 		[
 			sg.Text("Enter Password to Decode"),
 			sg.InputText(size=(15, 2), password_char='*', key="-Decode Password-"),
@@ -209,7 +203,7 @@ def main():
 	window = sg.Window("Image Viewer", layout)
 
 	image_upload_flag = False
-	image_decoded = False
+	encoded_upload_flag = False
 	while True:
 		event, values = window.read()
 		if event == "Exit" or event == sg.WIN_CLOSED:
@@ -223,7 +217,7 @@ def main():
 				bio = io.BytesIO()
 				image.save(bio, format="PNG")
 				window["-IMAGE-"].update(data=bio.getvalue())
-		if event == "Encode":
+		if event == "Encode and Download":
 			if image_upload_flag == False:
 				sg.popup('No image uploaded, please upload an image first')
 				continue
@@ -235,10 +229,14 @@ def main():
 			if len(ori_password) == 0:
 				sg.popup('No password provided')
 				continue
+			if len(values["-New Name-"]) == 0:
+				sg.popup("Please Create A New Image Name")
+				continue
 			password = hashlib.sha256(ori_password.encode()).hexdigest()
 			new_image = encode(image, encode_message, password)
+			new_image.copy().save(values["-New Name-"] + ".png")
 
-			image_decoded = True
+			# image_decoded = True
 			new_bio = io.BytesIO()
 			new_image.save(new_bio, format="PNG")
 			window['-IMAGEAFTER-'].update(data=new_bio.getvalue())
@@ -247,29 +245,44 @@ def main():
 			# save encoded image into database
 			inserted_id = db_operations(new_bio, encode_message, ori_password)
 			sg.popup('image encoded successfully, saved in database, the inserted_id is: ' + str(inserted_id))
+		if event == "Input Image":
+			filename = values["-Encoded FILE-"]
+			if os.path.exists(filename):
+				image_to_decode = Image.open(values["-Encoded FILE-"])
+				encoded_upload_flag = True
+				image_to_decode.thumbnail((400, 400))
+				bio = io.BytesIO()
+				image_to_decode.save(bio, format="PNG")
+				window["-IMAGE-"].update(data=bio.getvalue())
 		if event == "Decode":
-			if image_decoded == False:
-				sg.popup('Image is not encoded, please encode first')
+			if encoded_upload_flag == False:
+				sg.popup('No encoded image uploaded')
 				continue
+
+			input_key = values['-Key-']
 			password = values['-Decode Password-']
+			if db_searching(input_key) == False:
+				sg.popup('Key is not existing')
+				continue
+			else:
+				pass
+
 			if len(password) == 0:
 				sg.popup('No password entered')
 				continue
+
 			password = hashlib.sha256(password.encode()).hexdigest()
-			decode_result = decode(new_image, password)
+			decode_result = decode(image_to_decode, password)
+
 			if decode_result == False:
 				sg.popup('Incorrect password')
 				continue
+
 			window["-Decoded Message-"].update(decode_result)
 	window.close()
 
 
 # Driver Code
-
-
 if __name__ == '__main__':
-	# Calling main function
 	main()
 
-# eel.init('../src')
-# eel.start('index.html')
