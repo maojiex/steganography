@@ -154,6 +154,15 @@ def db_searching(id):
 		return True
 	return False
 
+def is_valid(oid):
+        if not oid:
+            return False
+
+        try:
+            bson.ObjectId(oid)
+            return True
+        except (bson.errors.InvalidId, TypeError):
+            return False 
 
 	
 	
@@ -261,6 +270,9 @@ def main():
 
 			input_key = values['-Key-']
 			password = values['-Decode Password-']
+			if is_valid(input_key) == False:
+				sg.popup("Not a valid Key")
+				continue
 			if db_searching(input_key) == False:
 				sg.popup('Key is not existing')
 				continue
