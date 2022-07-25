@@ -7,7 +7,7 @@ Han Bao: Encrypted password
 
 Lijuan Zhuge: GUI Design, Database setup
 
-Yue Liu: encryption and decryption of plain text
+Yue Liu: Encryption and Decryption of plain text
 
 Functions:
 message encryption; encrypted password; database to store data; Auth0 Verification
