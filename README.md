@@ -1,8 +1,8 @@
 # steganography
 Contributions:
-Maojie Xia: message encoding to image, duo authentation
-Han Bao: encrypted password
-Lijuan Zhuge: GUI, Database
+Maojie Xia: Key Verification, Code Optimization
+Han Bao: Encrypted password
+Lijuan Zhuge: GUI Design, Database setup
 Yue Liu: 
 
 Functions:
