@@ -1,3 +1,4 @@
+from tabnanny import check
 from tkinter import *
 from tkinter import filedialog
 from tkinter.filedialog import SaveFileDialog
@@ -9,6 +10,7 @@ import PySimpleGUI as sg
 import hashlib
 from PIL import Image
 import bson
+from gridfs import validate_string
 import pymongo
 import requests
 import urllib
@@ -164,8 +166,30 @@ def is_valid(oid):
         except (bson.errors.InvalidId, TypeError):
             return False 
 
+def validate_password(password):
+    # length of password must be between [8, 20]
+    # password must contain at least one digit
+    # password must contain at least one lower case character
+    # password must contain at least one upper case character
+    # length, digit, lower, upper
+    checks = [False] * 4
+
+    if len(password) >= 8 and len(password) <= 20:
+        checks[0] = True
+    
+    for char in password:
+        if char.isdigit():
+            checks[1] = True
+        elif char.islower():
+            checks[2] = True
+        elif char.isupper():
+            checks[3] = True
+    
+    for i in range(len(checks)):
+        if not checks[i]:
+            return i
 	
-	
+    return -1
 
 # Main Function
 def main():
@@ -237,6 +261,20 @@ def main():
 			ori_password = values['-Encode Password-']
 			if len(ori_password) == 0:
 				sg.popup('No password provided')
+				continue
+            # validate password
+			validate_res = validate_password(ori_password)
+			if validate_res == 0:
+				sg.popup('Length of password must be between 8 and 20')
+				continue
+			elif validate_res == 1:
+				sg.popup('Password must contain at least one digit')
+				continue
+			elif validate_res == 2:
+				sg.popup('Password must contain at least one lower case character')
+				continue
+			elif validate_res == 3:
+				sg.popup('Password must contain at least one upper case character')
 				continue
 			if len(values["-New Name-"]) == 0:
 				sg.popup("Please Create A New Image Name")
