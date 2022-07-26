@@ -1,7 +1,7 @@
 # steganography
 Contributions:
 
-Maojie Xia: Key Verification, Code Optimization
+Maojie Xia:  Most Encryption and Decryption functions, Key Verification, Code Optimization
 
 Han Bao: Encrypted password
 
