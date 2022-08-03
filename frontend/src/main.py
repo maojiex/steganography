@@ -2,7 +2,6 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter.filedialog import SaveFileDialog
 from click import command
-import eel
 import io
 import os
 import PySimpleGUI as sg
@@ -214,9 +213,12 @@ def main():
 	image_upload_flag = False
 	encoded_upload_flag = False
 	while True:
+
 		event, values = window.read()
+		
 		if event == "Exit" or event == sg.WIN_CLOSED:
 			break
+
 		if event == "Load Image":
 			filename = values["-FILE-"]
 			if os.path.exists(filename):
@@ -226,6 +228,7 @@ def main():
 				bio = io.BytesIO()
 				image.save(bio, format="PNG")
 				window["-IMAGE-"].update(data=bio.getvalue())
+
 		if event == "Encode and Download":
 			if image_upload_flag == False:
 				sg.popup('No image uploaded, please upload an image first')
@@ -253,7 +256,8 @@ def main():
 			window["imagetag_after"].update("Image Encoded")
 			# save encoded image into database
 			inserted_id = db_operations(new_bio, encode_message, ori_password)
-			sg.popup('image encoded successfully, saved in database, the inserted_id is: ' + str(inserted_id))
+			sg.popup('image encoded successfully, saved in database, please write down the key to decode: ' + str(inserted_id))
+
 		if event == "Input Image":
 			filename = values["-Encoded FILE-"]
 			if os.path.exists(filename):
@@ -263,6 +267,7 @@ def main():
 				bio = io.BytesIO()
 				image_to_decode.save(bio, format="PNG")
 				window["-IMAGE-"].update(data=bio.getvalue())
+
 		if event == "Decode":
 			if encoded_upload_flag == False:
 				sg.popup('No encoded image uploaded')
