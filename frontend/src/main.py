@@ -217,7 +217,8 @@ def main():
 		 	sg.Button("Encode and Download"),
 		],
         [sg.Text("You can decode Here: ", size = (50,1),font=('Helvetica', 15),text_color='blue')],
-		[
+        [sg.Image(key="-IMAGEtobedecoded-", size=(50, 1))],
+        [
 			sg.Text("Image to Decode"),
 			sg.Input(size=(25, 1), key="-Encoded FILE-"),
 			sg.FileBrowse(file_types=file_types),
@@ -302,7 +303,7 @@ def main():
 				image_to_decode.thumbnail((400, 400))
 				bio = io.BytesIO()
 				image_to_decode.save(bio, format="PNG")
-				window["-IMAGE-"].update(data=bio.getvalue())
+				window["-IMAGEtobedecoded-"].update(data=bio.getvalue())
 		if event == "Decode":
 			if encoded_upload_flag == False:
 				sg.popup('No encoded image uploaded')
