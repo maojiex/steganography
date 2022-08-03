@@ -1,3 +1,4 @@
+from tabnanny import check
 from tkinter import *
 from tkinter import filedialog
 from tkinter.filedialog import SaveFileDialog
@@ -8,6 +9,7 @@ import PySimpleGUI as sg
 import hashlib
 from PIL import Image
 import bson
+from gridfs import validate_string
 import pymongo
 import requests
 import urllib
@@ -163,14 +165,37 @@ def is_valid(oid):
         except (bson.errors.InvalidId, TypeError):
             return False 
 
+def validate_password(password):
+    # length of password must be between [8, 20]
+    # password must contain at least one digit
+    # password must contain at least one lower case character
+    # password must contain at least one upper case character
+    # length, digit, lower, upper
+    checks = [False] * 4
+
+    if len(password) >= 8 and len(password) <= 20:
+        checks[0] = True
+    
+    for char in password:
+        if char.isdigit():
+            checks[1] = True
+        elif char.islower():
+            checks[2] = True
+        elif char.isupper():
+            checks[3] = True
+    
+    for i in range(len(checks)):
+        if not checks[i]:
+            return i
 	
-	
+    return -1
 
 # Main Function
 def main():
 	layout = [
-		[sg.Image(key="-IMAGE-"), sg.Image(key="-IMAGEAFTER-")],
-		[sg.Text(key="imagetag", size=(50, 1)), sg.Text(key="imagetag_after", size=(50, 1))],
+		[sg.Image(key="-IMAGE-", size=(50, 1)), sg.Image(key="-IMAGEAFTER-", size=(50, 1))],
+		[sg.Text(key="imagetag", size=(30, 1)), sg.Text(key="imagetag_after", size=(30, 1))],
+        [sg.Text("You can encode Here: ", size = (50,1),font=('Helvetica', 15),text_color='blue')],
 		[
 			sg.Text("Image File"),
 			sg.Input(size=(25, 1), key="-FILE-"),
@@ -186,17 +211,19 @@ def main():
 			sg.InputText(size=(15, 2), password_char='*', key="-Encode Password-"),
 		],
 		[
-			sg.Text("Type Decoded Image Name"),
+			sg.Text("Type Eecoded Image Name"),
 		 	sg.InputText(size=(15, 2), key="-New Name-"), 
 		 	sg.Button("Encode and Download"),
 		],
-		[
+        [sg.Text("You can decode Here: ", size = (50,1),font=('Helvetica', 15),text_color='blue')],
+        [sg.Image(key="-IMAGEtobedecoded-", size=(50, 1))],
+        [
 			sg.Text("Image to Decode"),
 			sg.Input(size=(25, 1), key="-Encoded FILE-"),
 			sg.FileBrowse(file_types=file_types),
 			sg.Button("Input Image"),
 		],		
-		[sg.Text("Enter the Key"), sg.Input(size=(30,2), key="-Key-")],
+		[sg.Text("Enter the Key"), sg.Input(size=(30,2), key="-Key-"),sg.Text("hint : the inserted_id when image are uploaded to database",font=('Helvetica',10))],
 		[
 			sg.Text("Enter Password to Decode"),
 			sg.InputText(size=(15, 2), password_char='*', key="-Decode Password-"),
@@ -224,7 +251,7 @@ def main():
 			if os.path.exists(filename):
 				image = Image.open(values["-FILE-"])
 				image_upload_flag = True
-				image.thumbnail((400, 400))
+				image.thumbnail((200, 200))
 				bio = io.BytesIO()
 				image.save(bio, format="PNG")
 				window["-IMAGE-"].update(data=bio.getvalue())
@@ -240,6 +267,20 @@ def main():
 			ori_password = values['-Encode Password-']
 			if len(ori_password) == 0:
 				sg.popup('No password provided')
+				continue
+            # validate password
+			validate_res = validate_password(ori_password)
+			if validate_res == 0:
+				sg.popup('Length of password must be between 8 and 20')
+				continue
+			elif validate_res == 1:
+				sg.popup('Password must contain at least one digit')
+				continue
+			elif validate_res == 2:
+				sg.popup('Password must contain at least one lower case character')
+				continue
+			elif validate_res == 3:
+				sg.popup('Password must contain at least one upper case character')
 				continue
 			if len(values["-New Name-"]) == 0:
 				sg.popup("Please Create A New Image Name")
@@ -266,7 +307,7 @@ def main():
 				image_to_decode.thumbnail((400, 400))
 				bio = io.BytesIO()
 				image_to_decode.save(bio, format="PNG")
-				window["-IMAGE-"].update(data=bio.getvalue())
+				window["-IMAGEtobedecoded-"].update(data=bio.getvalue())
 
 		if event == "Decode":
 			if encoded_upload_flag == False:
