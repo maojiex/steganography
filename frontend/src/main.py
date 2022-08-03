@@ -103,10 +103,6 @@ def encode(image, data, password):
 	data = password + data
 	new_img = image.copy()
 	encode_enc(new_img, data)
-
-	# new_img_name = input("Enter the name of new image(with extension) : ")
-	# new_img.save("./output_img/" + new_img_name, str(new_img_name.split(".")[1].upper()))
-	# GUI_encode(new_img)
 	return new_img
 
 
@@ -155,7 +151,7 @@ def db_searching(id):
 		return True
 	return False
 
-def is_valid(oid):
+def is_valid_key(oid):
         if not oid:
             return False
 
@@ -316,7 +312,7 @@ def main():
 
 			input_key = values['-Key-']
 			password = values['-Decode Password-']
-			if is_valid(input_key) == False:
+			if is_valid_key(input_key) == False:
 				sg.popup("Not a valid Key")
 				continue
 			if db_searching(input_key) == False:

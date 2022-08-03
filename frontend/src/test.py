@@ -1,9 +1,14 @@
 import hashlib
+import certifi
+import urllib
 import os
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 from PIL import Image
 import unittest
 from main import decode
 from main import validate_password
+from main import genData
 
 class Testing(unittest.TestCase):
     def test_validate_password(self):
@@ -31,6 +36,22 @@ class Testing(unittest.TestCase):
         
         password = hashlib.sha256('Abcd1234'.encode()).hexdigest()
         self.assertEqual(decode(image_to_decode, password), 'xyz')
+    
+    def test_genData(self):
+        self.assertEqual(genData("1234"), ['00110001', '00110010', '00110011', '00110100'])
+        self.assertEqual(genData("abcd"), ['01100001', '01100010', '01100011', '01100100'])
+        self.assertEqual(genData("QWER"), ['01010001', '01010111', '01000101', '01010010'])
+        self.assertEqual(genData("!@#$"), ['00100001', '01000000', '00100011', '00100100'])
+        self.assertEqual(genData("[];',./"), ['01011011', '01011101', '00111011', '00100111', '00101100', '00101110', '00101111'])
+
+    def test_isConnected(self):
+        conn = MongoClient(
+            "mongodb+srv://LijuanZhuge:" + urllib.parse.quote(
+                "I=myself100%") + "@cluster0.botulzy.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())
+        try:
+            conn.finalproject.command('ismaster')
+        except ConnectionFailure:
+            print("Server not available")
 
 if __name__ == '__main__':
     unittest.main()
