@@ -194,8 +194,9 @@ def validate_password(password):
 # Main Function
 def main():
 	layout = [
-		[sg.Image(key="-IMAGE-"), sg.Image(key="-IMAGEAFTER-")],
-		[sg.Text(key="imagetag", size=(50, 1)), sg.Text(key="imagetag_after", size=(50, 1))],
+		[sg.Image(key="-IMAGE-", size=(50, 1)), sg.Image(key="-IMAGEAFTER-", size=(50, 1))],
+		[sg.Text(key="imagetag", size=(30, 1)), sg.Text(key="imagetag_after", size=(30, 1))],
+        [sg.Text("You can encode Here: ", size = (50,1),font=('Helvetica', 15),text_color='blue')],
 		[
 			sg.Text("Image File"),
 			sg.Input(size=(25, 1), key="-FILE-"),
@@ -215,13 +216,14 @@ def main():
 		 	sg.InputText(size=(15, 2), key="-New Name-"), 
 		 	sg.Button("Encode and Download"),
 		],
+        [sg.Text("You can decode Here: ", size = (50,1),font=('Helvetica', 15),text_color='blue')],
 		[
 			sg.Text("Image to Decode"),
 			sg.Input(size=(25, 1), key="-Encoded FILE-"),
 			sg.FileBrowse(file_types=file_types),
 			sg.Button("Input Image"),
 		],		
-		[sg.Text("Enter the Key"), sg.Input(size=(30,2), key="-Key-")],
+		[sg.Text("Enter the Key"), sg.Input(size=(30,2), key="-Key-"),sg.Text("hint : the inserted_id when image are uploaded to database",font=('Helvetica',10))],
 		[
 			sg.Text("Enter Password to Decode"),
 			sg.InputText(size=(15, 2), password_char='*', key="-Decode Password-"),
@@ -246,7 +248,7 @@ def main():
 			if os.path.exists(filename):
 				image = Image.open(values["-FILE-"])
 				image_upload_flag = True
-				image.thumbnail((400, 400))
+				image.thumbnail((200, 200))
 				bio = io.BytesIO()
 				image.save(bio, format="PNG")
 				window["-IMAGE-"].update(data=bio.getvalue())
