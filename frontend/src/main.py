@@ -212,7 +212,7 @@ def main():
 			sg.InputText(size=(15, 2), password_char='*', key="-Encode Password-"),
 		],
 		[
-			sg.Text("Type Decoded Image Name"),
+			sg.Text("Type Eecoded Image Name"),
 		 	sg.InputText(size=(15, 2), key="-New Name-"), 
 		 	sg.Button("Encode and Download"),
 		],
