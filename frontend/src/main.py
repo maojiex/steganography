@@ -15,6 +15,7 @@ import pymongo
 import requests
 import urllib
 import certifi
+from cryptography.fernet import Fernet
 
 
 # PIL module is used to extract pixels of image and modify it
@@ -95,13 +96,40 @@ def encode_enc(new_img, data):
 		else:
 			x += 1
 
+# we will be encrypting the below string.
+
+message = "hello geeks"
+ 
+# generate a key for encryption and decryption
+# You can use fernet to generate 
+# the key or use random key generator
+# here I'm using fernet to generate key
+ 
+
+key = Fernet.generate_key()
+ 
+# Instance the Fernet class with the key
+ 
+
+fernet = Fernet(key)
+ 
+# then use the Fernet class instance 
+# to encrypt the string string must
+# be encoded to byte string before encryption
+
+encMessage = fernet.encrypt(message.encode())
+ 
+
+print("original string: ", message)
+
+print("encrypted string: ", encMessage)
 
 # Encode data into image
-def encode(image, data, password):
-	if len(data) == 0:
+def encode(image, encMessage, password):
+	if len(encMessage) == 0:
 		raise ValueError('Data is empty')
 
-	data = password + data
+	data = password + encMessage
 	new_img = image.copy()
 	encode_enc(new_img, data)
 
@@ -138,6 +166,18 @@ def decode(image, password):
 				return data[64:]
 			else:
 				return False
+    
+	# decrypt the encrypted string with the 
+    # Fernet instance of the key,
+    # that was used for encrypting the string
+    # encoded byte string is returned by decrypt method,
+    # so decode it to string with decode methods
+
+	decMessage = fernet.decrypt(data).decode()
+ 
+
+	print("decrypted string: ", decMessage)
+
 
 def db_operations(image, encode_message, password):
     conn = pymongo.MongoClient(
