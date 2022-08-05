@@ -137,7 +137,7 @@ def decode(image, password):
 def db_operations(image, encode_message, password):
     conn = pymongo.MongoClient(
         "mongodb+srv://LijuanZhuge:" + urllib.parse.quote(
-            "I=myself100%") + "@cluster0.botulzy.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())
+            "US-65&sR@P5A#@F") + "@cluster0.botulzy.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())
     db = conn.finalproject
     inserted_id = db.encoderecords.insert_one({"file": [{"encoded_img": bson.binary.Binary(image.getvalue())},{'encode_message':encode_message},{"password":password}]}).inserted_id
     return inserted_id
@@ -145,7 +145,7 @@ def db_operations(image, encode_message, password):
 def db_searching(id):
 	conn = pymongo.MongoClient(
 		"mongodb+srv://LijuanZhuge:" + urllib.parse.quote(
-			"I=myself100%") + "@cluster0.botulzy.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())
+			"US-65&sR@P5A#@F") + "@cluster0.botulzy.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())
 	db = conn.finalproject
 	if db.encoderecords.count_documents({"_id":bson.ObjectId(id)}) > 0:
 		return True
@@ -300,7 +300,7 @@ def main():
 			if os.path.exists(filename):
 				image_to_decode = Image.open(values["-Encoded FILE-"])
 				encoded_upload_flag = True
-				image_to_decode.thumbnail((400, 400))
+				image_to_decode.thumbnail((200, 200))
 				bio = io.BytesIO()
 				image_to_decode.save(bio, format="PNG")
 				window["-IMAGEtobedecoded-"].update(data=bio.getvalue())
