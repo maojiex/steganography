@@ -47,7 +47,7 @@ class Testing(unittest.TestCase):
     def test_isConnected(self):
         conn = MongoClient(
             "mongodb+srv://LijuanZhuge:" + urllib.parse.quote(
-                "I=myself100%") + "@cluster0.botulzy.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())
+                "US-65&sR@P5A#@F") + "@cluster0.botulzy.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())
         try:
             conn.finalproject.command('ismaster')
         except ConnectionFailure:
