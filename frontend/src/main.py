@@ -5,7 +5,9 @@ from tkinter.filedialog import SaveFileDialog
 from click import command
 import io
 import os
+from cryptography.fernet import Fernet
 import PySimpleGUI as sg
+
 import hashlib
 from PIL import Image
 import bson
@@ -129,6 +131,7 @@ def decode(image, password):
 		data += chr(int(binstr, 2))
 		if pixels[-1] % 2 != 0:
 			existing_password = data[:64]
+			print('password check:',password, existing_password)
 			if password == existing_password:
 				return data[64:]
 			else:
@@ -186,6 +189,35 @@ def validate_password(password):
 	
     return -1
 
+def encrypt(message):
+	# generate a key for encryption and decryption
+	key = Fernet.generate_key()
+	# Instance the Fernet class with the key
+	fernet = Fernet(key)
+	# then use the Fernet class instance
+	# to encrypt the string string must
+	# be encoded to byte string before encryption
+	encMessage = fernet.encrypt(message.encode())
+
+	print("original string: ", message)
+	print("encrypted string: ", encMessage)
+	return encMessage, key
+
+def decrypt(encMessage, key):
+	# decrypt the encrypted string with the
+	# Fernet instance of the key,
+	# that was used for encrypting the string
+	# encoded byte string is returned by decrypt method,
+	# so decode it to string with decode methods
+
+	# Instance the Fernet class with the key
+	fernet = Fernet(key)
+
+	decMessage = fernet.decrypt(encMessage).decode()
+
+	print("decrypted string: ", decMessage)
+	return decMessage
+
 # Main Function
 def main():
 	layout = [
@@ -219,7 +251,9 @@ def main():
 			sg.FileBrowse(file_types=file_types),
 			sg.Button("Input Image"),
 		],		
-		[sg.Text("Enter the Key"), sg.Input(size=(30,2), key="-Key-"),sg.Text("hint : the inserted_id when image are uploaded to database",font=('Helvetica',10))],
+		[sg.Text("Enter the Database Insert id"), sg.Input(size=(30,2), key="-Key-"),sg.Text("hint : the inserted_id when image are uploaded to database",font=('Helvetica',10))],
+		[sg.Text("Enter the encode key"), sg.Input(size=(30, 2), key="-Keynew-"),],
+
 		[
 			sg.Text("Enter Password to Decode"),
 			sg.InputText(size=(15, 2), password_char='*', key="-Decode Password-"),
@@ -247,7 +281,8 @@ def main():
 			if os.path.exists(filename):
 				image = Image.open(values["-FILE-"])
 				image_upload_flag = True
-				image.thumbnail((200, 200))
+				image.thumbnail((150, 150))
+
 				bio = io.BytesIO()
 				image.save(bio, format="PNG")
 				window["-IMAGE-"].update(data=bio.getvalue())
@@ -260,6 +295,9 @@ def main():
 			if len(encode_message) == 0:
 				sg.popup('No encode message provided')
 				continue
+			#add plain text encrypt
+			encrypt_message, keygenerate = encrypt(encode_message)
+
 			ori_password = values['-Encode Password-']
 			if len(ori_password) == 0:
 				sg.popup('No password provided')
@@ -282,7 +320,8 @@ def main():
 				sg.popup("Please Create A New Image Name")
 				continue
 			password = hashlib.sha256(ori_password.encode()).hexdigest()
-			new_image = encode(image, encode_message, password)
+			print('encrypt str:',encrypt_message.decode('ascii'))
+			new_image = encode(image, encrypt_message.decode('ascii'), password)
 			new_image.copy().save(values["-New Name-"] + ".png")
 
 			# image_decoded = True
@@ -292,15 +331,18 @@ def main():
 			window["imagetag"].update("Original Image")
 			window["imagetag_after"].update("Image Encoded")
 			# save encoded image into database
-			inserted_id = db_operations(new_bio, encode_message, ori_password)
-			sg.popup('image encoded successfully, saved in database, please write down the key to decode: ' + str(inserted_id))
+			inserted_id = db_operations(new_bio, encode_message, password)
+			sg.popup('image encoded successfully, saved in database, please write down the key to decode: ' + str(inserted_id) +"\n"+ "key:"+keygenerate.decode('ascii'))
+			print('insert_id:',str(inserted_id))
+			print('key:',keygenerate.decode('ascii'))
+
 
 		if event == "Input Image":
 			filename = values["-Encoded FILE-"]
 			if os.path.exists(filename):
 				image_to_decode = Image.open(values["-Encoded FILE-"])
 				encoded_upload_flag = True
-				image_to_decode.thumbnail((200, 200))
+				image_to_decode.thumbnail((150, 150))
 				bio = io.BytesIO()
 				image_to_decode.save(bio, format="PNG")
 				window["-IMAGEtobedecoded-"].update(data=bio.getvalue())
@@ -312,6 +354,8 @@ def main():
 
 			input_key = values['-Key-']
 			password = values['-Decode Password-']
+			keynew = values['-Keynew-']
+      
 			if is_valid_key(input_key) == False:
 				sg.popup("Not a valid Key")
 				continue
@@ -332,11 +376,16 @@ def main():
 				sg.popup('Incorrect password')
 				continue
 
-			window["-Decoded Message-"].update(decode_result)
+			# get ori encode message from decryption
+			decryption_message = decrypt(decode_result.encode('ascii'), keynew.encode('ascii'))
+
+			window["-Decoded Message-"].update(decryption_message)
 	window.close()
 
 
 # Driver Code
 if __name__ == '__main__':
 	main()
+
+
 
