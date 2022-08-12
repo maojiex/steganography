@@ -377,8 +377,11 @@ def main():
 				continue
 
 			# get ori encode message from decryption
-			decryption_message = decrypt(decode_result.encode('ascii'), keynew.encode('ascii'))
-
+			try:
+				decryption_message = decrypt(decode_result.encode('ascii'), keynew.encode('ascii'))
+			except:
+				sg.popup("key input error")
+				
 			window["-Decoded Message-"].update(decryption_message)
 	window.close()
 
