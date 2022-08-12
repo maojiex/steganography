@@ -5,7 +5,7 @@ Maojie Xia:  Most Encryption and Decryption functions, Key Verification, Code Op
 
 Han Bao: Password with validation and encryption features
 
-Lijuan Zhuge: GUI Design, Database setup
+Lijuan Zhuge: GUI Design and implementation, Database related functions
 
 Yue Liu: Encryption and Decryption of plain text
 

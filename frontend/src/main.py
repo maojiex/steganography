@@ -253,6 +253,7 @@ def main():
 		],		
 		[sg.Text("Enter the Database Insert id"), sg.Input(size=(30,2), key="-Key-"),sg.Text("hint : the inserted_id when image are uploaded to database",font=('Helvetica',10))],
 		[sg.Text("Enter the encode key"), sg.Input(size=(30, 2), key="-Keynew-"),],
+
 		[
 			sg.Text("Enter Password to Decode"),
 			sg.InputText(size=(15, 2), password_char='*', key="-Decode Password-"),
@@ -281,6 +282,7 @@ def main():
 				image = Image.open(values["-FILE-"])
 				image_upload_flag = True
 				image.thumbnail((150, 150))
+
 				bio = io.BytesIO()
 				image.save(bio, format="PNG")
 				window["-IMAGE-"].update(data=bio.getvalue())
@@ -334,6 +336,7 @@ def main():
 			print('insert_id:',str(inserted_id))
 			print('key:',keygenerate.decode('ascii'))
 
+
 		if event == "Input Image":
 			filename = values["-Encoded FILE-"]
 			if os.path.exists(filename):
@@ -352,7 +355,7 @@ def main():
 			input_key = values['-Key-']
 			password = values['-Decode Password-']
 			keynew = values['-Keynew-']
-
+      
 			if is_valid_key(input_key) == False:
 				sg.popup("Not a valid Key")
 				continue
