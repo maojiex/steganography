@@ -131,7 +131,7 @@ def decode(image, password):
 		data += chr(int(binstr, 2))
 		if pixels[-1] % 2 != 0:
 			existing_password = data[:64]
-			print('password check:',password, existing_password)
+			# print('password check:',password, existing_password)
 			if password == existing_password:
 				return data[64:]
 			else:
@@ -199,8 +199,8 @@ def encrypt(message):
 	# be encoded to byte string before encryption
 	encMessage = fernet.encrypt(message.encode())
 
-	print("original string: ", message)
-	print("encrypted string: ", encMessage)
+	# print("original string: ", message)
+	# print("encrypted string: ", encMessage)
 	return encMessage, key
 
 def decrypt(encMessage, key):
@@ -215,7 +215,7 @@ def decrypt(encMessage, key):
 
 	decMessage = fernet.decrypt(encMessage).decode()
 
-	print("decrypted string: ", decMessage)
+	# print("decrypted string: ", decMessage)
 	return decMessage
 
 # Main Function
@@ -320,7 +320,7 @@ def main():
 				sg.popup("Please Create A New Image Name")
 				continue
 			password = hashlib.sha256(ori_password.encode()).hexdigest()
-			print('encrypt str:',encrypt_message.decode('ascii'))
+			# print('encrypt str:',encrypt_message.decode('ascii'))
 			new_image = encode(image, encrypt_message.decode('ascii'), password)
 			new_image.copy().save(values["-New Name-"] + ".png")
 
